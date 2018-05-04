@@ -1,13 +1,19 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import moment from 'moment';
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+
+
+const DAY_CLASS = 'day';
+const DAY_DISABLED_CLASS = 'text-muted';
+const DAY_SELECTED_CLASS = 'active';
 
 class Calendar extends React.Component {
 
   constructor(props) {
     super(props);
 
-    const defaultDate = moment(props.selectedDate, 'YYYY-MM-DD');
+    const defaultDate = moment(props.defaultDate);
+    console.log(defaultDate.format('L'));
     this.state = {
       defaultDate: defaultDate,
       monthStartDate: moment(defaultDate).startOf('month'),
@@ -35,45 +41,49 @@ class Calendar extends React.Component {
   render() {
     const selectedDate = this.state.selectedDate || this.state.defaultDate;
 
-    const startDate = this.state.monthStartDate;
-    const endDate = moment(startDate).endOf('month');
+    const monthStartDate = moment(this.state.monthStartDate);
+    const monthEndDate = moment(monthStartDate).endOf('month');
 
-    const pageStartDate = moment(startDate).subtract(startDate.weekday(), 'days');
-    const pageEndDate = moment(endDate).add(7 - endDate.weekday(), 'days');
+    const pageStartDate = moment(monthStartDate).subtract(monthStartDate.weekday(), 'days');
+    const pageEndDate = moment(monthEndDate).add(7 - monthEndDate.weekday(), 'days');
 
-    console.log('selected: ', selectedDate.format('L'));
-    console.log('start ', startDate.format('L'));
-    console.log('end ', endDate.format('L'));
-    console.log('page start ', pageStartDate.format('L'));
-    console.log('page end ', pageEndDate.format('L'));
-
-    const currentMonth = startDate.month();
+    const currentMonth = monthStartDate.month();
     const rows = [];
     let columns = [];
 
-    let d = pageStartDate.clone();
+    const d = pageStartDate.clone();
     while (d.isSameOrBefore(pageEndDate)) {
-      const day = d.date();
+      const dayOfMonth = d.date();
       const isoWeekday = d.isoWeekday();
+
       const key = columns.length + rows.length;
 
-      let className = 'day';
-      let clickHandle = this.selectDate;
+      let clickHandle;
+      let classes = [DAY_CLASS];
 
-      if (currentMonth != d.month()) {
-        columns.push(<td key={key}></td>);
+      if (d.isBefore(monthStartDate)) {
+        clickHandle = this.prevMonth;
+        classes.push(DAY_DISABLED_CLASS);
+      } else if (d.isAfter(monthEndDate)) {
+        clickHandle = this.nextMonth;
+        classes.push(DAY_DISABLED_CLASS);
       } else {
-        if (d.isSame(selectedDate)) {
-          className += ' active';
-          clickHandle = undefined;
-        }
-        if (isoWeekday == 6 || isoWeekday == 7) {
-          className += ' text-muted';
-          clickHandle = undefined;
-        }
-
-        columns.push(<td className={className} key={key} data-day={day} onClick={clickHandle}>{day}</td>);
+        clickHandle = this.selectDate;
       }
+
+      if (d.isSame(selectedDate)) {
+        classes.push(DAY_SELECTED_CLASS);
+        clickHandle = undefined;
+      }
+
+      columns.push(<td
+        className={classes.join(' ')}
+        key={key}
+        data-day={dayOfMonth}
+        onClick={clickHandle}>
+          {dayOfMonth}
+        </td>
+      );
 
       if (d.weekday() == 6) {
         rows.push(<tr key={rows.length}>{columns}</tr>);
@@ -88,23 +98,14 @@ class Calendar extends React.Component {
       headerRows.push(<th key={i}>{weekdayNames[i]}</th>)
     }
 
-    console.log(rows);
-
     return (
       <div className="datepicker">
         <table>
           <thead>
-            {/*
             <tr>
-              <th onClick={this.prevMonth}><i className="fa fa-arrow-left icon-arrow-left glyphicon glyphicon-arrow-left"></i></th>
-              <th colSpan="5">{m.get('month')+1} / {m.get('year')}</th>
-              <th onClick={this.nextMonth}><i className="fa fa-arrow-right icon-arrow-right glyphicon glyphicon-arrow-right"></i></th>
-            </tr>
-            */}
-            <tr>
-              <th className="controll-button" onClick={this.prevMonth}>«</th>
-              <th className="datepicker-switch" colSpan="5">{startDate.format('MMMM YYYY')}</th>
-              <th className="controll-button" onClick={this.nextMonth}>»</th>
+              <th className="controll-button prev" onClick={this.prevMonth}></th>
+              <th className="datepicker-switch" colSpan="5">{monthStartDate.format('MMMM YYYY')}</th>
+              <th className="controll-button next" onClick={this.nextMonth}></th>
             </tr>
             <tr>
               {headerRows}
@@ -117,6 +118,14 @@ class Calendar extends React.Component {
       </div>
     );
   }
+}
+
+Calendar.propTypes = {
+  defaultDate: PropTypes.object.isRequired,
+}
+
+Calendar.defaultProps = {
+  defaultDate: moment(),
 }
 
 export default Calendar;

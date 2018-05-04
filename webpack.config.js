@@ -2,13 +2,14 @@ const path = require('path');
 const webpack = require('webpack');
 
 
-const EXAMPLE_DIR = path.resolve(__dirname, 'example');
-const BUILD_DIR = path.resolve(__dirname, '.');
+const SRC_DIR = path.resolve(__dirname, 'src');
+const BUILD_DIR = path.resolve(__dirname, 'dist');
 
 module.exports = {
   mode: 'development',
-  entry: path.join(__dirname, 'index.jsx'),
+  entry: path.join(SRC_DIR, 'index.jsx'),
   output: {
+    path: BUILD_DIR,
     filename: 'bundle.js',
   },
   resolve: {
