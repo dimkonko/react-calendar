@@ -1,0 +1,50 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>React-Bootstrap Date Picker Example</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body {
+                padding-bottom:300px;
+            }
+
+            .datepicker {
+              padding: 0;
+            }
+            .datepicker .controll-button:hover {
+              background-color: gray;
+              cursor: pointer;
+            }
+            .datepicker th {
+              font-size: 16px;
+              font-weight: bold;
+              padding: 10px;
+              text-align: center;
+            }
+            .datepicker td {
+              padding: 12px;
+              text-align: center;
+            }
+            .datepicker .day {
+              font-size: 14px;
+            }
+            .datepicker table tr td.active.active, .datepicker table tr td.active:hover.active {
+              background: blue;
+              border-radius: 50px;
+            }
+            .datepicker table tr td.day:hover {
+              border-radius: 50px;
+              background-color: yellow;
+              cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="react">
+        </div>
+        <script src="./bundle.js"></script>
+    </body>
+</html>
