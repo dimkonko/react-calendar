@@ -1,23 +1,60 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
+
+import addMonths from 'date-fns/add_months';
+import subMonths from 'date-fns/sub_months';
+import startOfWeek from 'date-fns/start_of_week'
+import lastDayOfWeek from 'date-fns/last_day_of_week';
+import endOfMonth from 'date-fns/end_of_month';
+import eachDay from 'date-fns/each_day';
+import format from 'date-fns/format';
 
 
 const DAY_CLASS = 'day';
 const DAY_DISABLED_CLASS = 'text-muted';
 const DAY_SELECTED_CLASS = 'active';
 
+
 class Calendar extends React.Component {
+
+  static cloneWithoutTime(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  static cloneWithNewDay(date, day) {
+    return new Date(date.getFullYear(), date.getMonth(), day);
+  }
+
+  static getMonthStartEndDates(date) {
+    const monthFirstDate = Calendar.cloneWithNewDay(date, 1);
+    const monthLastDate = endOfMonth(date);
+
+    return {
+      monthFirstDate: monthFirstDate,
+      monthLastDate: monthLastDate,
+      monthFirstWeedaykDate: startOfWeek(monthFirstDate),
+      monthLastWeekdayDate: lastDayOfWeek(monthLastDate),
+    };
+  }
 
   constructor(props) {
     super(props);
 
-    const defaultDate = moment(props.defaultDate);
-    console.log(defaultDate.format('L'));
+    const defaultDate = Calendar.cloneWithoutTime(props.defaultDate);
+    const {
+      monthFirstDate,
+      monthLastDate,
+      monthFirstWeedaykDate,
+      monthLastWeekdayDate,
+    } = Calendar.getMonthStartEndDates(defaultDate);
+
     this.state = {
       defaultDate: defaultDate,
-      monthStartDate: moment(defaultDate).startOf('month'),
-      selectedDate: undefined,
+      selectedDate: defaultDate,
+      monthFirstDate,
+      monthLastDate,
+      monthFirstWeedaykDate,
+      monthLastWeekdayDate,
     }
 
     this.selectDate = this.selectDate.bind(this);
@@ -27,53 +64,55 @@ class Calendar extends React.Component {
 
   selectDate(event) {
     const day = event.currentTarget.getAttribute('data-day');
-    this.setState({ selectedDate: moment(this.state.monthStartDate).set('date', day) });
+    this.setState({ selectedDate: Calendar.cloneWithNewDay(this.state.monthFirstDate, day) });
   }
 
   nextMonth() {
-    this.setState({ monthStartDate: this.state.monthStartDate.add(1, 'month') });
+    const nextMonthDate = addMonths(this.state.monthFirstDate, 1);
+    const monthStartEndDates = Calendar.getMonthStartEndDates(nextMonthDate);
+
+    this.setState(monthStartEndDates);
   }
 
   prevMonth() {
-      this.setState({ monthStartDate: this.state.monthStartDate.subtract(1, 'month') });
+    const prevMonthDate = addMonths(this.state.monthFirstDate, 1);
+    const monthStartEndDates = Calendar.getMonthStartEndDates(prevMonthDate);
+
+    this.setState(monthStartEndDates);
   }
 
   render() {
-    const selectedDate = this.state.selectedDate || this.state.defaultDate;
+    const {
+      selectedDate,
+      monthFirstDate,
+      monthLastDate,
+      monthFirstWeedaykDate,
+      monthLastWeekdayDate,
+    } = this.state;
 
-    const monthStartDate = moment(this.state.monthStartDate);
-    const monthEndDate = moment(monthStartDate).endOf('month');
+    const allDates = eachDay(monthFirstWeedaykDate, monthLastWeekdayDate);
 
-    const pageStartDate = moment(monthStartDate).subtract(monthStartDate.weekday(), 'days');
-    const pageEndDate = moment(monthEndDate).add(7 - monthEndDate.weekday(), 'days');
-
-    const currentMonth = monthStartDate.month();
     const rows = [];
     let columns = [];
 
-    const d = pageStartDate.clone();
-    while (d.isSameOrBefore(pageEndDate)) {
-      const dayOfMonth = d.date();
-      const isoWeekday = d.isoWeekday();
-
+    for (let i = 0; i < allDates.length; i++) {
+      const date = allDates[i];
+      const dayOfMonth = date.getDate();
       const key = columns.length + rows.length;
 
       let clickHandle;
       let classes = [DAY_CLASS];
 
-      if (d.isBefore(monthStartDate)) {
+      if (monthFirstDate > date) {
         clickHandle = this.prevMonth;
         classes.push(DAY_DISABLED_CLASS);
-      } else if (d.isAfter(monthEndDate)) {
+      } else if (monthLastDate < date) {
         clickHandle = this.nextMonth;
         classes.push(DAY_DISABLED_CLASS);
+      } else if (date.getTime() === selectedDate.getTime()) {
+        classes.push(DAY_SELECTED_CLASS);
       } else {
         clickHandle = this.selectDate;
-      }
-
-      if (d.isSame(selectedDate)) {
-        classes.push(DAY_SELECTED_CLASS);
-        clickHandle = undefined;
       }
 
       columns.push(<td
@@ -85,17 +124,16 @@ class Calendar extends React.Component {
         </td>
       );
 
-      if (d.weekday() == 6) {
+      const isLastWeekday = columns.length == 7;
+      if (isLastWeekday) {
         rows.push(<tr key={rows.length}>{columns}</tr>);
         columns = [];
       }
-      d.add(1, 'days')
     }
 
     const headerRows = [];
-    const weekdayNames = moment.weekdaysShort(true);
     for (let i = 0; i < 7; i++) {
-      headerRows.push(<th key={i}>{weekdayNames[i]}</th>)
+      headerRows.push(<th key={i}>{format(allDates[i], 'ddd')}</th>)
     }
 
     return (
@@ -104,7 +142,7 @@ class Calendar extends React.Component {
           <thead>
             <tr>
               <th className="controll-button prev" onClick={this.prevMonth}></th>
-              <th className="datepicker-switch" colSpan="5">{monthStartDate.format('MMMM YYYY')}</th>
+              <th className="datepicker-switch" colSpan="5">{format(monthFirstDate, 'MMMM YYYY')}</th>
               <th className="controll-button next" onClick={this.nextMonth}></th>
             </tr>
             <tr>
@@ -121,11 +159,11 @@ class Calendar extends React.Component {
 }
 
 Calendar.propTypes = {
-  defaultDate: PropTypes.object.isRequired,
-}
+  defaultDate: PropTypes.instanceOf(Date).isRequired,
+};
 
 Calendar.defaultProps = {
-  defaultDate: moment(),
-}
+  defaultDate: new Date(),
+};
 
 export default Calendar;
