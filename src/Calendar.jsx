@@ -10,7 +10,7 @@ import eachDay from 'date-fns/each_day';
 import format from 'date-fns/format';
 
 
-const DAY_CLASS = 'day';
+const DAY_CLASS = 'calendar-day';
 const DAY_DISABLED_CLASS = 'text-muted';
 const DAY_SELECTED_CLASS = 'active';
 
@@ -57,14 +57,23 @@ class Calendar extends React.Component {
       monthLastWeekdayDate,
     }
 
-    this.selectDate = this.selectDate.bind(this);
+    this.handleSelectDate = this.handleSelectDate.bind(this);
+    this.handleSelectDateKeyboard = this.handleSelectDateKeyboard.bind(this);
     this.nextMonth = this.nextMonth.bind(this);
     this.prevMonth = this.prevMonth.bind(this);
   }
 
-  selectDate(event) {
+  handleSelectDate(event) {
+    event.preventDefault();
+
     const day = event.currentTarget.getAttribute('data-day');
     this.setState({ selectedDate: Calendar.cloneWithNewDay(this.state.monthFirstDate, day) });
+  }
+
+  handleSelectDateKeyboard(event) {
+    if (event.key === 'Enter') {
+      this.handleSelectDate(event);
+    }
   }
 
   nextMonth() {
@@ -75,7 +84,7 @@ class Calendar extends React.Component {
   }
 
   prevMonth() {
-    const prevMonthDate = addMonths(this.state.monthFirstDate, 1);
+    const prevMonthDate = subMonths(this.state.monthFirstDate, 1);
     const monthStartEndDates = Calendar.getMonthStartEndDates(prevMonthDate);
 
     this.setState(monthStartEndDates);
@@ -112,14 +121,16 @@ class Calendar extends React.Component {
       } else if (date.getTime() === selectedDate.getTime()) {
         classes.push(DAY_SELECTED_CLASS);
       } else {
-        clickHandle = this.selectDate;
+        clickHandle = this.handleSelectDate;
       }
 
       columns.push(<td
         className={classes.join(' ')}
         key={key}
+        onClick={clickHandle}
         data-day={dayOfMonth}
-        onClick={clickHandle}>
+        role="gridcell"
+        tabIndex="0">
           {dayOfMonth}
         </td>
       );
@@ -133,17 +144,23 @@ class Calendar extends React.Component {
 
     const headerRows = [];
     for (let i = 0; i < 7; i++) {
-      headerRows.push(<th key={i}>{format(allDates[i], 'ddd')}</th>)
+      headerRows.push(<th
+        className="calendar-header-weekday"
+        key={i}
+        role="columnheader"
+        scope="col">
+          {format(allDates[i], 'ddd')}
+        </th>)
     }
 
     return (
-      <div className="datepicker">
-        <table>
+      <div className="calendar">
+        <table role="grid">
           <thead>
             <tr>
-              <th className="controll-button prev" onClick={this.prevMonth}></th>
-              <th className="datepicker-switch" colSpan="5">{format(monthFirstDate, 'MMMM YYYY')}</th>
-              <th className="controll-button next" onClick={this.nextMonth}></th>
+              <th className="calendar-button-prev" role="gridcell" tabIndex="0" onClick={this.prevMonth}></th>
+              <th className="calendar-header-text" colSpan="5">{format(monthFirstDate, 'MMMM YYYY')}</th>
+              <th className="calendar-button-next" role="gridcell" tabIndex="0" onClick={this.nextMonth}></th>
             </tr>
             <tr>
               {headerRows}

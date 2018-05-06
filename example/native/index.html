@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>React-Bootstrap Date Picker Example</title>
+
+    <style>
+        .calendar {
+          padding: 0;
+        }
+
+        .calendar-button-prev:after{
+          content: "«";
+        }
+        .calendar-button-next:after{
+          content: "»";
+        }
+        .calendar-button-next:hover, .calendar-button-prev:hover {
+          background-color: #d1d1d1;
+          cursor: pointer;
+        }
+
+        .calendar th {
+          padding: 6px;
+          font-size: 16px;
+          font-weight: bold;
+          text-align: center;
+        }
+        .calendar-day {
+          padding: 6px;
+          font-size: 14px;
+          text-align: center;
+          cursor: pointer;
+        }
+        .calendar-day:hover {
+          border-radius: 30px;
+          background-color: #d1d1d1;
+        }
+
+        .calendar .text-muted {
+          color: #cccccc;
+        }
+        .calendar .text-muted:hover {
+          background-color: #e8e8e8;
+        }
+
+        .calendar .active {
+          background: #569fff;
+          border-radius: 30px;
+        }
+        .calendar .active {
+          color: white;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="bundle.js"></script>
+  </body>
+</html>
