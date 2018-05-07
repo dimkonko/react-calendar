@@ -154,23 +154,21 @@ class Calendar extends React.Component {
     }
 
     return (
-      <div className="calendar">
-        <table role="grid">
-          <thead>
-            <tr>
-              <th className="calendar-button-prev" role="gridcell" tabIndex="0" onClick={this.prevMonth}></th>
-              <th className="calendar-header-text" colSpan="5">{format(monthFirstDate, 'MMMM YYYY')}</th>
-              <th className="calendar-button-next" role="gridcell" tabIndex="0" onClick={this.nextMonth}></th>
-            </tr>
-            <tr>
-              {headerRows}
-            </tr>
-          </thead>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
-      </div>
+      <table className="calendar" role="grid">
+        <thead>
+          <tr>
+            <th className="calendar-button-prev" role="gridcell" tabIndex="0" onClick={this.prevMonth}></th>
+            <th className="calendar-header-text" colSpan="5">{format(monthFirstDate, 'MMMM YYYY')}</th>
+            <th className="calendar-button-next" role="gridcell" tabIndex="0" onClick={this.nextMonth}></th>
+          </tr>
+          <tr>
+            {headerRows}
+          </tr>
+        </thead>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>
     );
   }
 }

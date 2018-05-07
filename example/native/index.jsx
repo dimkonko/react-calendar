@@ -7,7 +7,6 @@ import Calendar from '../../src/Calendar';
 class App extends React.Component {
 
   render() {
-    const LabelISOString = new Date().toISOString();
     return (
       <Calendar defaultDate={new Date('2018-05-04')} />
     );
